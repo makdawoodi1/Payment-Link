@@ -1,0 +1,50 @@
+.form-control:focus {
+  color: #495057;
+  background-color: #fff;
+  border-color: #02fdc4;
+  outline: 0;
+  box-shadow: 0 0 0 0.2rem rgb(2 253 196 / 27%);
+}
+
+textarea#desc {
+  display: none;
+}
+
+div#toolbarGroup-mode,
+div#toolbarGroup-styles,
+div#toolbarGroup-fonts,
+div#toolbarGroup-components,
+div#toolbarGroup-intervals,
+div#toolbarGroup-insert,
+div#toolbarGroup-special {
+  display: none;
+}
+
+.form-control:not([readonly]):focus {
+  color: #495057;
+  background-color: #fff;
+  border-color: #02fdc4;
+  outline: 0;
+  box-shadow: 0 0 0 0.2rem rgb(2 253 196 / 27%);
+}
+.btn-primary {
+  color: #000;
+  background-color: #02fdc4;
+  border-color: #02fdc4;
+}
+.btn-primary:hover,
+.btn-primary:focus {
+  color: #fff;
+  background-color: #0cb18b !important;
+  border-color: #0cb18b !important;
+}
+#desc {
+  background: #e9ecef;
+  padding: 10px;
+  border-radius: 0.25rem;
+  border: 1px solid #ced4da;
+  min-height: 100px;
+}
+.alert:not(.alert-danger):not(.alert-success) {
+  display: none;
+}
