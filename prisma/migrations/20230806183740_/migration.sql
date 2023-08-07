@@ -1,0 +1,14 @@
+-- AlterTable
+ALTER TABLE "orders" ALTER COLUMN "fname" SET DEFAULT '',
+ALTER COLUMN "lname" SET DEFAULT '',
+ALTER COLUMN "address" SET DEFAULT '',
+ALTER COLUMN "address2" SET DEFAULT '',
+ALTER COLUMN "city" SET DEFAULT '',
+ALTER COLUMN "state" SET DEFAULT '',
+ALTER COLUMN "zip" SET DEFAULT '',
+ALTER COLUMN "country" SET DEFAULT '',
+ALTER COLUMN "paid_amount" SET DEFAULT '',
+ALTER COLUMN "paid_amount_currency" SET DEFAULT '',
+ALTER COLUMN "txn_id" SET DEFAULT '',
+ALTER COLUMN "phone" SET DEFAULT '',
+ALTER COLUMN "payment_status" SET DEFAULT '';

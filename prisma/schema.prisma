@@ -1,0 +1,36 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model orders {
+  id                   Int      @id @default(autoincrement())
+  project_name         String   @db.VarChar(50)
+  email                String   @db.VarChar(150)
+  link_token           String   @db.VarChar(300) @unique
+  packages             String   @db.VarChar(300)
+  description          String
+  item_price           Int
+  sales_email          String   @db.VarChar(150)
+  item_price_currency  String   @db.VarChar(11)
+  stripe_customer_id   String   @db.VarChar(300) @default("")
+  fname                String?   @db.VarChar(150) @default("")
+  lname                String?   @db.VarChar(150) @default("")
+  address              String?   @db.VarChar(300) @default("")
+  address2             String?   @db.VarChar(300) @default("")
+  city                 String?   @db.VarChar(50) @default("")
+  state                String?   @db.VarChar(50) @default("")
+  zip                  String?   @db.VarChar(10) @default("")
+  country              String?   @db.VarChar(50) @default("")
+  paid_amount          String?   @db.VarChar(10) @default("")
+  paid_amount_currency String?   @db.VarChar(10) @default("")
+  txn_id               String?   @db.VarChar(100) @default("")
+  phone                String?   @db.VarChar(20) @default("")
+  payment_status       String?   @db.VarChar(20) @default("")
+  created              DateTime @default(now()) @db.Timestamp(0)
+}
