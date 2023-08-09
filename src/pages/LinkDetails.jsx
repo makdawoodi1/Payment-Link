@@ -80,10 +80,10 @@ const LinkDetails = () => {
       </div>
       <br />
       {
-        sessionData?.sale_mail ? (
-          <p>This email is send to <a href={sessionData?.sale_mail}>{sessionData?.sale_mail}</a></p>
+        sessionData?.sales_email ? (
+          <p>This email is send to <a href={sessionData?.sales_email}>{sessionData?.sales_email}</a></p>
         ) : (
-          <p class="alert alert-danger">No Record Found Matching Your Token!</p>
+          <p className="alert alert-danger">No Record Found Matching Your Token!</p>
         )
       }
     </div>

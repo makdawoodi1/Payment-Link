@@ -1,24 +1,26 @@
 import React, { useState, useEffect } from "react";
 import { countries } from "../data/data";
 import { API_URL } from "../../config";
-import { useSearchParams } from "react-router-dom";
-import { CardElement, useStripe } from "@stripe/react-stripe-js";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { CardElement, useElements, useStripe } from "@stripe/react-stripe-js";
 
 const PaymentPage = () => {
+  const navigate = useNavigate();
   const stripe = useStripe();
+  const elements = useElements();
   const [searchParams] = useSearchParams();
   const [sessionData, setSessionData] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState({ cardErrors: '', paymentErrors: '' })
   const [formData, setFormData] = useState({
     payment_method_id: "",
-    amount: sessionData?.item_price,
-    currency: sessionData?.item_price_currency,
-    p_name: sessionData?.project_name,
-    desc: sessionData?.description,
+    amount: "",
+    currency: "",
+    project_name: "",
+    description: "",
     firstname: "",
     lastname: "",
-    email: sessionData?.email,
+    email: "",
     phone: "",
     address: "",
     address2: "",
@@ -26,7 +28,7 @@ const PaymentPage = () => {
     state: "",
     zip: "",
     country: "",
-    link_token: sessionData?.link_token,
+    link_token: searchParams.get("token"),
   });
 
   const handleChange = (e) => {
@@ -43,7 +45,7 @@ const PaymentPage = () => {
     stripe
       .createPaymentMethod({
         type: "card",
-        card: <CardElement />
+        card: elements.getElement(CardElement)
       })
       .then(function (result) {
         // Handle result.error or result.paymentMethod
@@ -51,32 +53,69 @@ const PaymentPage = () => {
           console.error(result.error)
           setErrors({ ...errors, cardErrors: result.error.message })
         }
-        
+        setFormData({ 
+          ...formData, 
+          payment_method_id: result.paymentMethod.id,
+          amount: sessionData.item_price,
+          currency: sessionData.item_price_currency,
+          project_name: sessionData.project_name,
+          description: sessionData.description,
+          email: sessionData.email
+         })
         fetch(`${API_URL}/api/payments/create-payment`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(formData),
+          body: JSON.stringify({ 
+            ...formData, 
+            payment_method_id: result.paymentMethod.id,
+            amount: sessionData.item_price,
+            currency: sessionData.item_price_currency,
+            project_name: sessionData.project_name,
+            description: sessionData.description,
+            email: sessionData.email
+          }),
         })
           .then((response) => response.json())
           .then((data) => {
             if (data.success) {
               console.log(data);
+              navigate("/payments/confirm-payment")
             } else if (data.error) {
-              // Handle any errors or show an error message
               setErrors({ ...errors, paymentErrors: data.error.message })
-              // if(response.error.message == "FAIL") window.location = ('https://codernative.com/payments/fail.php')
-
+              navigate('/payments/failed-payment');
             }
 
             else if (data.requires_action) {
-
+              setErrors({ ...errors, paymentErrors: 'Requires Action' })
+              stripe.handleCardAction(
+                data.payment_intent_client_secret
+              ).then((result) => {
+                if (result.error) {
+                  setErrors({ ...errors, paymentErrors: result.error.message })
+                }
+                else {
+                  fetch(`${API_URL}/api/payments/confirm-payment`, {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ 
+                      payment_intent_id: result.paymentIntent.id,
+                    }),
+                  }).then(function(confirmResult) {
+                    return confirmResult.json();
+                }).then(() => {
+                  console.log(data);
+                  navigate("/payments/confirm-payment")
+                });
+                }
+              })
             }
             console.log(data);
           })
           .catch((error) => {
-            // Handle fetch errors or show an error message
             console.error("Error during fetch:", error);
           });
 
@@ -148,7 +187,7 @@ const PaymentPage = () => {
             <label>Client's Name</label>
             <input
               type="text"
-              name="p_name"
+              name="project_name"
               id="p_name"
               className="field form-control"
               placeholder="Enter name"
@@ -159,7 +198,7 @@ const PaymentPage = () => {
           </div>
           <div className="form-group col-md-12">
             <div
-              id="desc"
+              id="description"
               style={{
                 background: "#e9ecef",
                 padding: "10px",
@@ -178,7 +217,7 @@ const PaymentPage = () => {
             <label>First Name</label>
             <input
               type="text"
-              name="fname"
+              name="firstname"
               id="fname"
               className="field form-control"
               placeholder="Enter First Name"
@@ -189,7 +228,7 @@ const PaymentPage = () => {
             <label>Last Name</label>
             <input
               type="text"
-              name="lname"
+              name="lastname"
               id="lname"
               className="field form-control"
               placeholder="Enter Last Name"
@@ -303,26 +342,28 @@ const PaymentPage = () => {
             </div>
           </div>
           <div className="col-12 mt-5">
-            <button
-              type="button"
-              onClick={handleSubmit}
-              className={`btn btn-block btn-primar ${submitting ?? "d-none"}`}
-              id="payBtn"
-            >
-              Submit Payment
-            </button>
-            <button
-              type="button"
-              disabled
-              className={`btn btn-block ${!submitting ?? "d-none"} btn-primary`}
-              id="proces"
-            >
-              Processing <div className="spinner-border text-primary"></div>
-            </button>
-            <div className={`mt-5 alert ${errors?.cardErrors ?? 'alert-danger'}`} id="card-errors">
+            {stripe && elements && <>
+              <button
+                type="button"
+                onClick={handleSubmit}
+                className={`btn btn-block btn-primary ${submitting === true ? "d-none" : ""}`}
+                id="payBtn"
+              >
+                Submit Payment
+              </button>
+              <button
+                type="button"
+                disabled
+                className={`btn btn-block ${submitting === false ? "d-none" : ""} btn-primary`}
+                id="proces"
+              >
+                Processing <div className="spinner-border text-primary"></div>
+              </button>
+            </>}
+            <div className={`mt-5 alert ${errors?.cardErrors ? 'alert-danger' : ""}`} id="card-errors">
                 {errors?.cardErrors}
             </div>
-            <div className="mt-5 alert" id="payment-errors"></div>
+            <div className={`mt-5 alert ${errors?.paymentErrors ? 'alert-danger' : ""}`} id="payment-errors"></div>
           </div>
         </form>
       </div>

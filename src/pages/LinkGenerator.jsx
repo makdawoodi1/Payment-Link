@@ -9,6 +9,7 @@ const LinkGenerator = () => {
     desc: "",
     amount: "",
     email: "",
+    sales_mail: "",
     currency: "USD",
     package: [],
   });
@@ -92,7 +93,7 @@ const LinkGenerator = () => {
                 onChange={handleChange}
               />
             </div>
-            <div class="mt-3 col-md-12">
+            <div className="mt-3 col-md-12">
               <label>Description</label>
               <textarea
                 name="desc"

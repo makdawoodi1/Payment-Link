@@ -5,6 +5,7 @@ import { STRIPE_PUBLISH_KEY } from "../config";
 import LinkGenerator from "./pages/LinkGenerator" 
 import LinkDetails from "./pages/LinkDetails" 
 import PaymentPage from "./pages/PaymentPage" 
+import FailedPayment from "./pages/FailedPayment" 
 import { loadStripe } from '@stripe/stripe-js';
 import {
   PaymentElement,
@@ -12,15 +13,11 @@ import {
   useStripe,
   useElements,
 } from '@stripe/react-stripe-js';
+import ConfirmedPayment from "./pages/ConfirmedPayment";
 
 const stripePromise = loadStripe(STRIPE_PUBLISH_KEY);
 
 const App = () => {
-  const options = {
-    mode: 'payment',
-    amount: 1099,
-    currency: 'USD'
-  };
 
   return (
     <BrowserRouter>
@@ -41,6 +38,14 @@ const App = () => {
               <PaymentPage />
             </Elements>
             }
+          />
+          <Route
+            path={`/payments/failed-payment`}
+            element={<FailedPayment />}
+          />
+          <Route
+            path={`/payments/confirm-payment`}
+            element={<ConfirmedPayment />}
           />
         </Routes>
       </div>
