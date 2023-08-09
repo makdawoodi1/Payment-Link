@@ -41,6 +41,8 @@ const PaymentPage = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    setSubmitting(true)
+    setErrors({ paymentErrors: '', cardErrors: '' })
 
     stripe
       .createPaymentMethod({
@@ -51,7 +53,9 @@ const PaymentPage = () => {
         // Handle result.error or result.paymentMethod
         if (result.error) {
           console.error(result.error)
+          setSubmitting(false)
           setErrors({ ...errors, cardErrors: result.error.message })
+          return
         }
         setFormData({ 
           ...formData, 
@@ -81,8 +85,10 @@ const PaymentPage = () => {
           .then((data) => {
             if (data.success) {
               console.log(data);
+              setSubmitting(false)
               navigate("/payments/confirm-payment")
             } else if (data.error) {
+              setSubmitting(false)
               setErrors({ ...errors, paymentErrors: data.error.message })
               navigate('/payments/failed-payment');
             }
@@ -93,6 +99,7 @@ const PaymentPage = () => {
                 data.payment_intent_client_secret
               ).then((result) => {
                 if (result.error) {
+                  setSubmitting(false)
                   setErrors({ ...errors, paymentErrors: result.error.message })
                 }
                 else {
@@ -102,13 +109,17 @@ const PaymentPage = () => {
                       "Content-Type": "application/json",
                     },
                     body: JSON.stringify({ 
-                      payment_intent_id: result.paymentIntent.id,
+                      payment_intent: result.paymentIntent,
+                      link_token: searchParams.get("token")
                     }),
                   }).then(function(confirmResult) {
                     return confirmResult.json();
                 }).then(() => {
                   console.log(data);
+                  setSubmitting(false)
                   navigate("/payments/confirm-payment")
+                }).catch((error) => {
+                  console.error("Error during fetch:", error);
                 });
                 }
               })
@@ -117,11 +128,10 @@ const PaymentPage = () => {
           })
           .catch((error) => {
             console.error("Error during fetch:", error);
+          }).finally(() => {
+            setSubmitting(false)
           });
-
-
       });
-
   };
 
   useEffect(() => {
@@ -151,10 +161,11 @@ const PaymentPage = () => {
   return (
     <div className="panel container col-md-6 py-5">
       <img src="/logo.png" className="mb-4" style={{ width: "300px" }} />
-      {sessionData?.payment_status === "succeeded" && (
-        <h1 style="text-align:center">Already Paid</h1>
-      )}
-      <h2>Payment Details</h2>
+      {sessionData?.payment_status === "succeeded" ? (
+        <h1 className="text-center text-primary font-bold">Already Paid</h1>
+      ) : (
+        <>
+          <h2>Payment Details</h2>
       <div className="panel-body">
         <div id="paymentResponse"></div>
         <form className="row" method="POST" id="payment-form">
@@ -343,30 +354,39 @@ const PaymentPage = () => {
           </div>
           <div className="col-12 mt-5">
             {stripe && elements && <>
-              <button
-                type="button"
-                onClick={handleSubmit}
-                className={`btn btn-block btn-primary ${submitting === true ? "d-none" : ""}`}
-                id="payBtn"
-              >
-                Submit Payment
-              </button>
-              <button
-                type="button"
-                disabled
-                className={`btn btn-block ${submitting === false ? "d-none" : ""} btn-primary`}
-                id="proces"
-              >
-                Processing <div className="spinner-border text-primary"></div>
-              </button>
+              {
+                submitting ? (
+                  <button
+                    type="button"
+                    disabled
+                    className={`btn btn-block btn-primary`}
+                    id="proces"
+                  >
+                    Processing <div className="spinner-border text-primary"></div>
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleSubmit}
+                    className={`btn btn-block btn-primary`}
+                    id="payBtn"
+                  >
+                    Submit Payment
+                  </button>
+                )
+              }
             </>}
             <div className={`mt-5 alert ${errors?.cardErrors ? 'alert-danger' : ""}`} id="card-errors">
                 {errors?.cardErrors}
             </div>
-            <div className={`mt-5 alert ${errors?.paymentErrors ? 'alert-danger' : ""}`} id="payment-errors"></div>
+            <div className={`mt-5 alert ${errors?.paymentErrors ? 'alert-danger' : ""}`} id="payment-errors">
+                {errors?.paymentErrors}
+            </div>
           </div>
         </form>
       </div>
+        </>
+      )}
     </div>
   );
 };

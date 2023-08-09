@@ -8,7 +8,7 @@ const ConfirmedPayment = () => {
         <div className="status">
             <p>Payment successfully charged.</p>
             <p>A receipt of this transaction has been sent to your email address on file. </p>
-            <p>Please feel free to send us an email at<a href={MAIL_TO}>{SUPPORT_ADDRESS}</a> or call us at {SUPPORT_CONTACT} for billing related queries.</p>
+            <p>Please feel free to send us an email at <a href={MAIL_TO}>{SUPPORT_ADDRESS}</a> or call us at {SUPPORT_CONTACT} for billing related queries.</p>
             <p>Thank you for choosing <a href={SUPPORT_WEBSITE}>{SUPPORT_COMPANY}</a>.</p>
         </div>
     </div>

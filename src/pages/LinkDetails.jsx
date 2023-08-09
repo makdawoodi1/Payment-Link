@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { CopyToClipboard } from "react-copy-to-clipboard";
-import { API_URL } from "../../config";
+import { API_URL, CLIENT_URL } from "../../config";
 
 const LinkDetails = () => {
   const [sessionData, setSessionData] = useState("");
+  const [errors, setErrors] = useState(false)
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const [link, setLink] = useState(null);
   const [copiedValue, setCopiedValue] = useState(null);
+
+  const link = `${CLIENT_URL}/payments/payment-form?token=${searchParams.get("token")}`
 
   useEffect(() => {
     fetchSessionDetails();
@@ -24,15 +26,15 @@ const LinkDetails = () => {
       .then((data) => {
         if (data.success) {
           setSessionData(data.session_data);
-          setLink(
-            `${API_URL}/payments/payment-form?token=${data.session_data?.link_token}`
-          );
         } else {
           // Handle any errors or show an error message
+          setErrors(true)
+          console.error("Error during fetch:");  
         }
       })
       .catch((error) => {
         // Handle fetch errors or show an error message
+        setErrors(true)
         console.error("Error during fetch:", error);
       });
   };
@@ -80,7 +82,7 @@ const LinkDetails = () => {
       </div>
       <br />
       {
-        sessionData?.sales_email ? (
+        !errors ? (
           <p>This email is send to <a href={sessionData?.sales_email}>{sessionData?.sales_email}</a></p>
         ) : (
           <p className="alert alert-danger">No Record Found Matching Your Token!</p>

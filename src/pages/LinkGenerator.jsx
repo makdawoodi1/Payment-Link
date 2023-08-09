@@ -4,9 +4,10 @@ import { API_URL } from "../../config";
 
 const LinkGenerator = () => {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
     p_name: "",
-    desc: "",
+    description: "",
     amount: "",
     email: "",
     sales_mail: "",
@@ -24,6 +25,7 @@ const LinkGenerator = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    setLoading(true)
 
     fetch(`${API_URL}/api/payments/generate-link`, {
       method: "POST",
@@ -35,6 +37,7 @@ const LinkGenerator = () => {
       .then((response) => response.json())
       .then((data) => {
         if (data.success) {
+          setLoading(false)
           navigate(`/payments/link-details?token=${data.user.link_token}`);
         } else {
           // Handle any errors or show an error message
@@ -44,6 +47,8 @@ const LinkGenerator = () => {
       .catch((error) => {
         // Handle fetch errors or show an error message
         console.error("Error during fetch:", error);
+      }).finally(() => {
+        setLoading(false)
       });
   };
 
@@ -96,11 +101,12 @@ const LinkGenerator = () => {
             <div className="mt-3 col-md-12">
               <label>Description</label>
               <textarea
-                name="desc"
+                name="description"
                 className="form-control"
                 style={{height: "100px"}}
                 id="desc"
                 placeholder="Enter description"
+                onChange={handleChange}
               ></textarea>
             </div>
             <div className="mt-3 col-md-12">
@@ -210,6 +216,7 @@ const LinkGenerator = () => {
                 type="email"
                 name="sales_mail"
                 className="form-control"
+                placeholder="Enter email"
                 onChange={handleChange}
               />
             </div>
@@ -226,14 +233,25 @@ const LinkGenerator = () => {
             </div>
 
             <div className="mt-3 col-md-12">
-              <button
-                type="submit"
-                className="btn-block mt-3 btn btn-primary"
-                id="payBtn"
-                onClick={handleSubmit}
-              >
-                Generate Link
-              </button>
+              {loading ? (
+                <button
+                  type="button"
+                  disabled
+                  className="btn btn-block mt-3 btn-primary"
+                  id="proces"
+                >
+                  Processing <div className="spinner-border text-primary"></div>
+                </button>
+              ) : (
+                <button
+                  type="submit"
+                  className="btn btn-block mt-3 btn-primary"
+                  id="payBtn"
+                  onClick={handleSubmit}
+                >
+                  Generate Link
+                </button>
+              )}
             </div>
           </form>
         </div>

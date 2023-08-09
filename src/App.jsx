@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, redirect } from "react-router-dom";
 import { STRIPE_PUBLISH_KEY } from "../config";
 
 import LinkGenerator from "./pages/LinkGenerator" 
@@ -8,10 +8,7 @@ import PaymentPage from "./pages/PaymentPage"
 import FailedPayment from "./pages/FailedPayment" 
 import { loadStripe } from '@stripe/stripe-js';
 import {
-  PaymentElement,
   Elements,
-  useStripe,
-  useElements,
 } from '@stripe/react-stripe-js';
 import ConfirmedPayment from "./pages/ConfirmedPayment";
 
@@ -23,8 +20,11 @@ const App = () => {
     <BrowserRouter>
       <div>
         <Routes>
+          <Route exact path="/" remder={() => {
+            return redirect("/payments/link-generator")
+          }} />
           <Route
-            path={`/payments/link-generator` || '/payments' || ''}
+            path={`/payments/link-generator`}
             element={<LinkGenerator />}
           />
           <Route
