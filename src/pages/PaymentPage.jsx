@@ -31,6 +31,8 @@ const PaymentPage = () => {
     link_token: searchParams.get("token"),
   });
 
+  if (searchParams.get('token') === 'undefined') navigate("/payments/link-generator")
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevFormData) => ({

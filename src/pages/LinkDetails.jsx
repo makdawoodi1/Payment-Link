@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useSearchParams, useNavigate, useLocation } from "react-router-dom";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import { API_URL, CLIENT_URL } from "../../config";
 
 const LinkDetails = () => {
   const [sessionData, setSessionData] = useState("");
   const [errors, setErrors] = useState(false)
+  const [fetching, setFetching] = useState(true)
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [copiedValue, setCopiedValue] = useState(null);
@@ -25,6 +26,7 @@ const LinkDetails = () => {
       .then((response) => response.json())
       .then((data) => {
         if (data.success) {
+          setErrors(false)
           setSessionData(data.session_data);
         } else {
           // Handle any errors or show an error message
@@ -36,6 +38,8 @@ const LinkDetails = () => {
         // Handle fetch errors or show an error message
         setErrors(true)
         console.error("Error during fetch:", error);
+      }).finally(() => {
+        setFetching(false)
       });
   };
 
@@ -82,8 +86,10 @@ const LinkDetails = () => {
       </div>
       <br />
       {
-        !errors ? (
+        !errors && sessionData ? (
           <p>This email is send to <a href={sessionData?.sales_email}>{sessionData?.sales_email}</a></p>
+        ) : fetching ? (
+          <p className="alert alert-primary">Please wait! Fetching Record!</p>
         ) : (
           <p className="alert alert-danger">No Record Found Matching Your Token!</p>
         )

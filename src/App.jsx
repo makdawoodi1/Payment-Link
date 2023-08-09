@@ -6,6 +6,7 @@ import LinkGenerator from "./pages/LinkGenerator"
 import LinkDetails from "./pages/LinkDetails" 
 import PaymentPage from "./pages/PaymentPage" 
 import FailedPayment from "./pages/FailedPayment" 
+import FallBackComponent from "./pages/FallBackComponent" 
 import { loadStripe } from '@stripe/stripe-js';
 import {
   Elements,
@@ -20,9 +21,8 @@ const App = () => {
     <BrowserRouter>
       <div>
         <Routes>
-          <Route exact path="/" remder={() => {
-            return redirect("/payments/link-generator")
-          }} />
+          <Route exact path="/" element={<FallBackComponent />} />
+          <Route exact path="/payments" element={<FallBackComponent />} />
           <Route
             path={`/payments/link-generator`}
             element={<LinkGenerator />}
