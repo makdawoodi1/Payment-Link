@@ -7,8 +7,8 @@ import { sendPaymentMail, transporter } from "../nodemailer.js";
 
 const createPayment = async (req, res, next) => {
   const app = express();
+  const prisma = new PrismaClient();
   try {
-    const prisma = new PrismaClient();
     const {
       payment_method_id,
       amount,
@@ -80,14 +80,17 @@ const createPayment = async (req, res, next) => {
             resave: false
           }));
 
+          // Retreive Payment Intent Charge
+          const charge = await stripe.charges.retrieve(paymentIntent.latest_charge);
+
           // Checking Payment Intent Status
           if (paymentIntent.status === 'requires_action' && paymentIntent.next_action.type === 'use_stripe_sdk') {
             res.status(202).json({ requires_action: true, payment_intent_client_secret: paymentIntent.client_secret });
           }
   
           else if (paymentIntent.status === 'succeeded') {
-            const paid_amount = paymentIntent['charges']['data'][0]['amount_captured'] / 100;
-            const payment_status = paymentIntent['charges']['data'][0]['status']
+            const paid_amount = charge['amount_captured'] / 100;
+            const payment_status = charge['status']
 
             user = await updateUser(res, prisma, amount, currency, project_name, description, firstname, lastname, email, phone, address, address2, city, state, zip, country, link_token, paymentIntent)
 
@@ -181,6 +184,7 @@ const createCustomer = async (res, firstname, lastname, email, payment_method_id
 
 const updateUser = async (res, prisma, amount, currency, project_name, description, firstname, lastname, email, phone, address, address2, city, state, zip, country, link_token, paymentIntent) => {
   try {
+    const paid_amount = String(amount)
     const user = await prisma.orders.update({
       where: { link_token: link_token },
       data: {
@@ -199,7 +203,7 @@ const updateUser = async (res, prisma, amount, currency, project_name, descripti
         zip: zip,
         country: country,
         link_token: link_token,
-        paid_amount: amount,
+        paid_amount: paid_amount,
         txn_id: paymentIntent.id,
         payment_status: paymentIntent.status
       },

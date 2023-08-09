@@ -11,15 +11,22 @@ const fetchSessionDetails = async (req, res, next) => {
             link_token: token,
           },
         });
-        res.status(200).json({
-          success: true,
-          message: "Data fetched successfully!",
-          session_data: session_data,
-        });
+
+        if (session_data) {
+          res.status(200).json({
+            success: true,
+            message: "Data fetched successfully!",
+            session_data: session_data,
+          });
+        } else {
+          res
+            .status(400)
+            .json({ success: false, message: "Error while fetching data" });
+        }
       } else {
         res
           .status(400)
-          .json({ success: false, message: "Error while fetching data", error });
+          .json({ success: false, message: "Error when accessing token" });
       }
     } catch (error) {
       res

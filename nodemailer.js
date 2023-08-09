@@ -138,7 +138,8 @@ export async function sendPaymentMail(recipientsEmail, transactionID, paid_amoun
                     <td style="padding:5px 10px 5px 2px; border: 1px solid black; border-collapse: collapse;">${email}</td></tr>
                 <tr>
                     <th style="font-size: 14px; padding:5px 10px 5px 2px; border: 1px solid black; border-collapse: collapse;">Phone:</th>
-                    <td style="padding:5px 10px 5px 2px; border: 1px solid black; border-collapse: collapse;">${phone}</td></tr>'
+                    <td style="padding:5px 10px 5px 2px; border: 1px solid black; border-collapse: collapse;">${phone}</td>
+                </tr>
 
                 <tr style="border:none">
                     <th colspan="2" style="border:none"><h3 style="padding-top: 20px; text-align:left;">Billing Details</th>
