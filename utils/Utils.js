@@ -6,3 +6,13 @@ export function removeSpecialChar(str) {
   }
   return result;
 }
+
+export function validateParameters(params) {
+  for (const key in params) {
+    if (!params[key] && params[key] === '') {
+      return { response: false, type: key };
+    }
+  }
+
+  return { response: true };
+}
